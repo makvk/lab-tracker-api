@@ -74,7 +74,7 @@ public static class SubmissionsEndpoints
 
             return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         });
-
+        
         return app;
     }
 }
