@@ -15,10 +15,6 @@ public class Submission
     public Guid? TeacherId { get; private set; }
     public void GradeWork(int grade, string? comment)
     {
-        if (Status != SubmissionStatus.Checking)
-        {
-            throw new InvalidOperationException("Нельзя оценить работу, которая не находится на проверке");
-        }
         if ( !(2 <= grade && grade <= 5) )
         {
             throw new ArgumentException("Неверно указана оценка");

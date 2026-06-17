@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
+using LabManagement.App.Domain.Entities;
 using MediatR;
 
 namespace LabManagement.App.Features.Submissions.GradeSubmission;
 
-public class GradeSubmissionCommand: IRequest
+public class GradeSubmissionCommand: IRequest<Submission>
 {
-    public Guid SubmissionId { get; init; }
+    [JsonIgnore]
+    public Guid SubmissionId { get; set; }
+    
     public int Grade { get; init; }
     public string? Comment { get; init; }
     public Guid TeacherId { get; init; }

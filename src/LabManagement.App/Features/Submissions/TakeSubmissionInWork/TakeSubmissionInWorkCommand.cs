@@ -1,9 +1,12 @@
+using LabManagement.App.Domain.Entities;
+using System.Text.Json.Serialization;
 using MediatR;
 
 namespace LabManagement.App.Features.Submissions.TakeSubmissionInWork;
 
-public class TakeSubmissionInWorkCommand: IRequest
+public class TakeSubmissionInWorkCommand: IRequest<Submission>
 {
-    public Guid SubmissionId { get; init; }
-    public Guid TeacherId { get; init; }
+    [JsonIgnore]
+    public Guid SubmissionId { get; set; }
+    public Guid TeacherId { get; set; }
 }
