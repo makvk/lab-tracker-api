@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace LabManagement.Api.Services;
 
-public class CurrentUserService(HttpContextAccessor _httpContextAccessor) : ICurrentUserService
+public class CurrentUserService(IHttpContextAccessor _httpContextAccessor) : ICurrentUserService
 {
     public Guid? UserId
     {

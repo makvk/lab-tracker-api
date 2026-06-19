@@ -3,11 +3,17 @@ namespace LabManagement.App.Domain.Entities;
 public class LabWork
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    public string Title { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
-    public string FilePath { get; private set; } = string.Empty;
-    public Guid GroupId { get; private set; }
-    public Guid TeacherId { get; init; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    
+    // --- СВЯЗЬ С ГРУППОЙ ЧЕРЕЗ ГУИД ---
+    public Guid GroupId { get; set; }
+    public Group Group { get; set; } = null!;
+    
+    public Guid TeacherId { get; set; }
+    public Teacher Teacher { get; set; } = null!; 
+    
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset Deadline { get; private set; }
+    public DateTimeOffset Deadline { get; set; }
 }
