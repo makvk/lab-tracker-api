@@ -20,7 +20,17 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
             .Include(sub => sub.Teacher)
             .FirstOrDefaultAsync(sub => sub.Id == id, cancellationToken);
     }
+    public async Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await Teachers
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
 
+    public async Task<Student?> GetStudentByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await Students
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

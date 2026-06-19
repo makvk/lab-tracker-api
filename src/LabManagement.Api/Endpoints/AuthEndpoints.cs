@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using LabManagement.Api.Services;
 using Microsoft.AspNetCore.Identity.Data;
 using LabManagement.App.Common;
+using LabManagement.App.Features.Auth.Login;
+using MediatR;
 
 namespace LabManagement.Api.Endpoints;
 
@@ -50,22 +52,13 @@ public static class AuthEndpoints
             return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         });
 
-        app.MapPost("/api/auth/login", (LoginRequest request, IConfiguration configuration, ILabDbContext labDbContext) =>
+        app.MapPost("/api/auth/login", async (LoginCommand command, 
+            IConfiguration configuration, 
+            ILabDbContext labDbContext,
+            IMediator mediator) =>
         {
-            var jwtSettings = configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret не найден!");
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, "99999999-9999-9999-9999-999999999999"), // ID преподавателя
-                new Claim(ClaimTypes.Name, "Иван Иванович (Преподаватель)"),
-                new Claim(ClaimTypes.Role, "Teacher") // Наша ключевая роль!
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            return Results.Ok();
+            AuthResult res = await mediator.Send(command);
+            return Results.Ok(res);
         });
 
         return app;

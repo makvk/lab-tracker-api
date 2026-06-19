@@ -47,8 +47,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"], // Кто выпустил токен
-        ValidAudience = jwtSettings["Audience"],     // Для кого выпущен токен
+        ValidIssuer = jwtSettings["Issuer"],            // Кто выпустил токен
+        ValidAudience = jwtSettings["Audience"],        // Для кого выпущен токен
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(secretKey)) 
     };

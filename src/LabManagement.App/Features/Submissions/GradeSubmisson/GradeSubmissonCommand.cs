@@ -8,8 +8,9 @@ public class GradeSubmissionCommand: IRequest<Submission>
 {
     [JsonIgnore]
     public Guid SubmissionId { get; set; }
-    
+    [JsonIgnore]
+    public Guid TeacherId { get; set; }
     public int Grade { get; init; }
     public string? Comment { get; init; }
-    public Guid TeacherId { get; init; }
+    
 }

@@ -8,5 +8,6 @@ public class TakeSubmissionInWorkCommand: IRequest<Submission>
 {
     [JsonIgnore]
     public Guid SubmissionId { get; set; }
+    [JsonIgnore]
     public Guid TeacherId { get; set; }
 }

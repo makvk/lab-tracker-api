@@ -1,3 +1,4 @@
+using LabManagement.Api.Services;
 using LabManagement.App.Common.Exceptions;
 using LabManagement.App.Features.Submissions.GradeSubmission;
 using LabManagement.App.Features.Submissions.TakeSubmissionInWork;
@@ -14,10 +15,12 @@ public static class SubmissionsEndpoints
         app.MapPost("api/submissions/{id:guid}/grade", async (
             Guid id, 
             GradeSubmissionCommand command, 
-            IMediator mediator) =>
+            IMediator mediator,
+            ICurrentUserService currentUserService) =>
         {
             try
             {
+                command.TeacherId = currentUserService.UserId ?? Guid.Empty;
                 command.SubmissionId = id;
                 var updatedSubmission = await mediator.Send(command);
                 return Results.Ok(updatedSubmission);
@@ -31,9 +34,11 @@ public static class SubmissionsEndpoints
         app.MapPost("api/submissions/{id:guid}/take-in-work", async (
             Guid id, 
             TakeSubmissionInWorkCommand command, 
-            IMediator mediator) =>
+            IMediator mediator,
+            ICurrentUserService currentUserService) =>
         {
             try{
+                command.TeacherId = currentUserService.UserId ?? Guid.Empty;
                 command.SubmissionId = id;
                 var updatedSubmission = await mediator.Send(command);
                 return Results.Ok(updatedSubmission);
