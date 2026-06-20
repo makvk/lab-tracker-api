@@ -1,5 +1,7 @@
 using LabManagement.Api.Services;
+using LabManagement.App.Common;
 using LabManagement.App.Common.Exceptions;
+using LabManagement.App.Domain.Entities;
 using LabManagement.App.Features.Submissions.GradeSubmission;
 using LabManagement.App.Features.Submissions.SubmitWork;
 using LabManagement.App.Features.Submissions.TakeSubmissionInWork;
@@ -52,41 +54,36 @@ public static class SubmissionsEndpoints
             }
         }).RequireAuthorization(new AuthorizeAttribute {Roles = "Teacher"});
 
-        app.MapPost("/api/works/{id:guid}/submit", async (
-            [FromRoute] Guid id,
-            IFormFile file, // Принимаем файл через форму 
-            [FromServices] IMediator mediator,
-            [FromServices] ICurrentUserService currentUserService,
+        app.MapGet("api/submissions/{id:guid}", async (
+            Guid id,
+            ILabDbContext labDbContext,
             CancellationToken cancellationToken) =>
         {
-            // Валидация на то, что файл вообще пришел
-            if (file == null || file.Length == 0)
+            Submission? submission = await labDbContext.GetSubmissionByIdAsync(id, cancellationToken);
+            if (submission == null)
             {
-                return Results.BadRequest(new { error = "Файл не выбран или пуст" });
+                return Results.NotFound("Работа не найдена");
             }
+            return Results.Ok(submission);
+        });
 
-            // Открываем поток для чтения файла
-            using var stream = file.OpenReadStream();
-
-            var studentId = currentUserService.UserId ?? Guid.Empty;
-
-            var command = new SubmitWorkCommand
+        app.MapGet("api/submissions/work/{workId:guid}/student/{studentId:guid}", async (
+            Guid workId,
+            Guid studentId,
+            ILabDbContext labDbContext,
+            CancellationToken cancellationToken
+        ) => {
+            Submission? submission = await labDbContext.GetSubmissionByWorkAndStudentAsync(
+                workId,
+                studentId,
+                cancellationToken
+            );
+            if (submission == null)
             {
-                LabWorkId = id,
-                StudentId = studentId,
-                FileStream = stream,
-                FileName = file.FileName,
-                ContentType = file.ContentType
-            };
-
-            var submission = await mediator.Send(command, cancellationToken);
-
-            // Возвращаем 201 Created. Первый параметр — URL созданного ресурса, второй — сам объект
-            return Results.Created($"/api/submissions/{submission.Id}", submission);
-        })
-        .RequireAuthorization(new AuthorizeAttribute { Roles = "Student" })
-        .DisableAntiforgery()
-        .Accepts<IFormFile>("multipart/form-data");
+                return Results.NotFound("Не существует такой сдачи");
+            }
+            return Results.Ok(submission);
+        });
 
         return app;
     }

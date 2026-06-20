@@ -40,6 +40,14 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     {
         await Submissions.AddAsync(submission, cancellationToken);
     }
+    public async Task<Submission?> GetSubmissionByWorkAndStudentAsync(
+        Guid workId, 
+        Guid studentId, 
+        CancellationToken cancellationToken)
+    {
+        return await Submissions.FirstOrDefaultAsync(
+            s => s.LabWorkId == workId && s.StudentId == studentId, cancellationToken);
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

@@ -12,7 +12,7 @@ public class SubmitWorkHandler(ILabDbContext context): IRequestHandler<SubmitWor
     {
         // Определяем базовую директорию для хранения файлов
         // Directory.GetCurrentDirectory() вернет корень запущенного API-проекта
-        var uploadsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var uploadsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Uploads/SubmissionWorks");
 
         // Если папки "Uploads" еще нет на сервере - создаем её
         if (!Directory.Exists(uploadsDirectory))
@@ -33,7 +33,7 @@ public class SubmitWorkHandler(ILabDbContext context): IRequestHandler<SubmitWor
         }
 
         // Путь, который мы сохраним в базу данных (относительный)
-        string dbFilePath = Path.Combine("Uploads", uniqueFileName);
+        string dbFilePath = Path.Combine("Uploads/SubmissionWorks", uniqueFileName);
 
         // 5. Создаем сущность и пушим в БД
         Submission submission = new Submission(request.LabWorkId, request.StudentId, dbFilePath);

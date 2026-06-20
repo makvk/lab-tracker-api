@@ -1,13 +1,12 @@
 using LabManagement.App.Common;
 using LabManagement.App.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LabManagement.Api.Endpoints;
 
-public static class BuisnessEndpoints
+public static class GroupEndpoints
 {
-    public static IEndpointRouteBuilder MapBuisnessEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapGroupEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/groups", (ILabDbContext labDbContext) => {
             return Results.Ok(labDbContext.Groups);
@@ -35,33 +34,6 @@ public static class BuisnessEndpoints
             return Results.Ok(labWorks);
         });
 
-        app.MapGet("/api/works/{id:guid}", async (
-            Guid id,
-            ILabDbContext labDbContext) =>
-        {
-            LabWork? labWork = labDbContext.LabWorks.FirstOrDefault(lw => lw.Id == id);
-
-            if (labWork == null)
-            {
-                return Results.NotFound("Работа не найдена");
-            }
-
-            return Results.Ok(labWork);
-        });
-
-        app.MapGet("/api/works/{id:guid}/submissions", async (
-            Guid id,
-            ILabDbContext labDbContext) =>
-        {
-            List<Submission> submissions = await labDbContext.Submissions.Where(s => s.LabWorkId == id).ToListAsync();
-
-            if (submissions== null)
-            {
-                return Results.NotFound("Работа не найдена");
-            }
-
-            return Results.Ok(submissions);
-        });
         return app;
     }
 }

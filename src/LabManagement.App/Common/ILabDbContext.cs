@@ -15,5 +15,9 @@ public interface ILabDbContext
     Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Student?> GetStudentByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Group?> GetGroupByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Submission?> GetSubmissionByWorkAndStudentAsync(
+        Guid workId, 
+        Guid studentId, 
+        CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

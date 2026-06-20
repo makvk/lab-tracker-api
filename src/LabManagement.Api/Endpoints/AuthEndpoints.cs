@@ -28,31 +28,6 @@ public static class AuthEndpoints
             new AuthorizeAttribute {Roles = "Teacher,Student"}
         );
 
-        app.MapGet("api/auth/test-token-teacher", (IConfiguration configuration) =>
-        {
-            var jwtSettings = configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret не найден!");
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, "99999999-9999-9999-9999-999999999999"), // ID преподавателя
-                new Claim(ClaimTypes.Name, "Иван Иванович (Преподаватель)"),
-                new Claim(ClaimTypes.Role, "Teacher") // Наша ключевая роль!
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-            );
-
-            return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
-        });
-
         app.MapPost("/api/auth/login", async (LoginCommand command, 
             IConfiguration configuration, 
             ILabDbContext labDbContext,
@@ -88,6 +63,7 @@ public static class AuthEndpoints
                 return Results.Ok(
                     new Dictionary<string, object>
                     {
+                        {"userId", student.Id.ToString()},
                         {"role", "Student"},
                         {"name", student.FirstName},
                         {"group", groupName},
@@ -104,6 +80,7 @@ public static class AuthEndpoints
                 return Results.Ok(
                     new Dictionary<string, string>
                     {
+                        {"userId", teacher.Id.ToString()},
                         {"role", "Teacher"},
                         {"name", teacher.FirstName + ' ' + teacher.LastName},
                     }
