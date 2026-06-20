@@ -7,7 +7,7 @@ public class Submission
     // EF Core нужен пустой конструктор (можно приватный), чтобы собирать объект из базы
     private Submission() { }
 
-    // Конструктор для создания новой сдачи в твоем коде
+    // Конструктор для создания новой сдачи
     public Submission(Guid labWorkId, Guid studentId, string filePath)
     {
         Id = Guid.NewGuid();
@@ -42,10 +42,6 @@ public class Submission
     // --- ДОМЕННАЯ ЛОГИКА ---
     public void GradeWork(int grade, string? comment)
     {
-        if (grade < 2 || grade > 5)
-        {
-            throw new ArgumentException("Оценка должна быть от 2 до 5");
-        }
         
         if (Status != SubmissionStatus.Checking)
         {

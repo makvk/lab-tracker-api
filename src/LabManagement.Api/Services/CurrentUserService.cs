@@ -19,7 +19,7 @@ public class CurrentUserService(IHttpContextAccessor _httpContextAccessor) : ICu
             return Guid.TryParse(claimGuidString.Value, out var id) ? id : null;
         }
     }
-    public string? UserName
+    public string? Name
     {
         get
         { 

@@ -8,7 +8,7 @@ namespace LabManagement.App.Common;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(Guid userId, string email, string role);
+    string GenerateToken(Guid userId, string email, string role, string firstName);
 }
 
 public class JwtTokenGenerator : IJwtTokenGenerator
@@ -20,7 +20,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _configuration = configuration;
     }
 
-    public string GenerateToken(Guid userId, string email, string role)
+    public string GenerateToken(Guid userId, string email, string role, string name)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("Secret key missing");
@@ -33,7 +33,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         {
             new(ClaimTypes.NameIdentifier, userId.ToString()),
             new(ClaimTypes.Email, email),
-            new(ClaimTypes.Role, role) // Зашиваем роль (Teacher/Student)
+            new(ClaimTypes.Name, name),
+            new(ClaimTypes.Role, role), // Зашиваем роль (Teacher/Student)
         };
 
         var token = new JwtSecurityToken(

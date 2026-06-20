@@ -6,7 +6,7 @@ namespace LabManagement.Infrastructure.Persistence;
 
 public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(options), ILabDbContext
 {
-    public DbSet<Group> Groups { get; set; } // Добавили DbSet для групп
+    public DbSet<Group> Groups { get; set; } 
     public DbSet<Submission> Submissions { get; set; }
     public DbSet<Teacher> Teachers { get; set; } 
     public DbSet<Student> Students { get; set; } 
@@ -30,6 +30,15 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     {
         return await Students
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+    public async Task<Group?> GetGroupByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await Groups
+            .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
+    }
+    public async Task AddSubmissionAsync(Submission submission, CancellationToken cancellationToken)
+    {
+        await Submissions.AddAsync(submission, cancellationToken);
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

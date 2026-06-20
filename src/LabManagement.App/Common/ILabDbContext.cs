@@ -9,8 +9,11 @@ public interface ILabDbContext
     DbSet<Teacher> Teachers { get; set; }
     DbSet<Student> Students { get; set; }
     DbSet<LabWork> LabWorks { get; set; }
+    DbSet<Group> Groups { get; set; }
+    Task AddSubmissionAsync(Submission submission, CancellationToken cancellationToken);
     Task<Submission?> GetSubmissionByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Student?> GetStudentByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Group?> GetGroupByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -23,7 +23,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
 
         if (teacher != null && teacher.PasswordHash == request.Password)
         {
-            var token = _tokenGenerator.GenerateToken(teacher.Id, teacher.Email, "Teacher");
+            var token = _tokenGenerator.GenerateToken(teacher.Id, teacher.Email, "Teacher", teacher.FirstName);
             return new AuthResult(token, teacher.Id, teacher.Email, "Teacher", teacher.FirstName, teacher.LastName);
         }
 
@@ -33,7 +33,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
 
         if (student != null && student.PasswordHash == request.Password)
         {
-            var token = _tokenGenerator.GenerateToken(student.Id, student.Email, "Student");
+            var token = _tokenGenerator.GenerateToken(student.Id, student.Email, "Student", student.FirstName);
             return new AuthResult(token, student.Id, student.Email, "Student", student.FirstName, student.LastName);
         }
 

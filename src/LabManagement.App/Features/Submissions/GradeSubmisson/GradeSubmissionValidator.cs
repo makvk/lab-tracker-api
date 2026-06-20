@@ -1,4 +1,3 @@
-using System.Data;
 using FluentValidation; 
 
 namespace LabManagement.App.Features.Submissions.GradeSubmission;
@@ -8,7 +7,7 @@ public class GradeSubmissionValidator: AbstractValidator<GradeSubmissionCommand>
     public GradeSubmissionValidator()
     {
         RuleFor(command => command.Grade)
-            .ExclusiveBetween(2, 5).WithMessage("Оценка должна быть от 2 до 5.");
+            .ExclusiveBetween(0, 5).WithMessage("Оценка должна быть от 0 до 5.");
 
         RuleFor(command => command.SubmissionId)
             .NotEmpty().WithMessage("Идентификатор сдачи обязателен.");

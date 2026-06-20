@@ -8,6 +8,7 @@ public static class EndpointExtension
     {
         app.MapSubmissionsEndpoints();
         app.MapAuthEndpoints();
+        app.MapBuisnessEndpoints();
         return app;
     }
 }
