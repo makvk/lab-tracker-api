@@ -1,9 +1,12 @@
+using LabManagement.Api.DTOs;
 using LabManagement.Api.Services;
 using LabManagement.App.Common;
 using LabManagement.App.Domain.Entities;
+using LabManagement.App.Features.LabWorks;
 using LabManagement.App.Features.Submissions.SubmitWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,13 +34,15 @@ public static class WorkEndpoints
             Guid id,
             ILabDbContext labDbContext) =>
         {
-            List<Submission> submissions = await labDbContext.Submissions.Where(s => s.LabWorkId == id).ToListAsync();
+            List<Submission> submissions = await labDbContext.Submissions
+                .Include(s => s.Student)
+                .Where(s => s.LabWorkId == id).ToListAsync();
 
             if (submissions== null)
             {
                 return Results.NotFound("Работа не найдена");
             }
-
+            
             return Results.Ok(submissions);
         });
 
@@ -77,10 +82,57 @@ public static class WorkEndpoints
         .DisableAntiforgery()
         .Accepts<IFormFile>("multipart/form-data");
 
-        // app.MapPost("api/works/create-work", (
-        //     IFormFile file,
+        app.MapPost("api/works/create-work", async (
+            [FromForm] CreateLabWorkRequest request,
+            [FromServices] IMediator mediator,
+            [FromServices] ICurrentUserService currentUserService
+        ) =>
+        {
+            IReadOnlyList<IFormFile> files = request.Files;
+            if (files == null || files.Count == 0)
+            {
+                return Results.BadRequest(new { error = "Файл не выбран или пуст" });
+            }
 
-        // ) => {});
+            var filesList = new List<FileUploadModel>();
+            var openedStreams = new List<Stream>();
+
+            try {
+                foreach (var file in files)
+                {
+                    var stream = file.OpenReadStream(); 
+                    openedStreams.Add(stream);
+                    filesList.Add(new FileUploadModel(stream, file.FileName));
+                }
+
+                var command = new CreateLabWorkCommand()
+                {
+                    Title = request.Title,
+                    Description = request.Description,
+                    Deadline = request.Deadline,
+                    GroupId = request.GroupId,
+                    TeacherId = currentUserService.UserId ?? Guid.Empty,
+                    Files = filesList
+                };
+
+                LabWork labWork = await mediator.Send(command);
+
+                return Results.Created($"/api/groups/{labWork.GroupId}/works", labWork);
+            }
+            finally
+            {
+                foreach (var stream in openedStreams)
+                {
+                    await stream.DisposeAsync();
+                }
+            }
+        })
+        .RequireAuthorization(
+            new AuthorizeAttribute { Roles = "Teacher"} 
+        )
+        .DisableAntiforgery()
+        .Accepts<IFormFile>("multipart/form-data");
+
         return app;
     }
 }

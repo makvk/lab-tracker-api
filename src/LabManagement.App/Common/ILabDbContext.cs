@@ -11,6 +11,7 @@ public interface ILabDbContext
     DbSet<LabWork> LabWorks { get; set; }
     DbSet<Group> Groups { get; set; }
     Task AddSubmissionAsync(Submission submission, CancellationToken cancellationToken);
+    Task AddLabWorkAsync(LabWork labWork, CancellationToken cancellationToken);
     Task<Submission?> GetSubmissionByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Student?> GetStudentByIdAsync(Guid id, CancellationToken cancellationToken);

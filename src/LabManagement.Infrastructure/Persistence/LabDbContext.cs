@@ -40,6 +40,11 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     {
         await Submissions.AddAsync(submission, cancellationToken);
     }
+
+    public async Task AddLabWorkAsync(LabWork labWork, CancellationToken cancellationToken)
+    {
+        await LabWorks.AddAsync(labWork, cancellationToken);
+    }
     public async Task<Submission?> GetSubmissionByWorkAndStudentAsync(
         Guid workId, 
         Guid studentId, 
