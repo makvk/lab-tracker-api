@@ -70,10 +70,13 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
+app.AddMiddleware();
+
 app.AddEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.MapSwagger("/openapi/{documentName}.json");
     app.MapScalarApiReference();
 }

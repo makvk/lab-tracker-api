@@ -16,11 +16,6 @@ public static class AuthEndpoints
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        app.Map("/", () =>
-        {
-            return Results.Redirect("/scalar");
-        });
-
         app.MapGet("/api/auth-test", (ICurrentUserService currentUser) =>
         {
             return Results.Ok($"Вы {currentUser.Role}");
@@ -88,7 +83,8 @@ public static class AuthEndpoints
             }
             return Results.NotFound();
 
-        }).RequireAuthorization(
+        })
+        .RequireAuthorization(
             new AuthorizeAttribute {Roles = "Teacher,Student"}
         );
 

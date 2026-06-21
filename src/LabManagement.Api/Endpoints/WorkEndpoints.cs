@@ -133,6 +133,17 @@ public static class WorkEndpoints
         .DisableAntiforgery()
         .Accepts<IFormFile>("multipart/form-data");
 
+        app.MapDelete("api/works/{id:guid}", async (
+            Guid id,
+            ILabDbContext labDbContext,
+            CancellationToken cancellationToken
+        ) =>
+        {
+            await labDbContext.DeleteLabWorkByIdAsync(id, cancellationToken);
+            await labDbContext.SaveChangesAsync(cancellationToken);
+            return Results.NoContent();
+        })
+        .RequireAuthorization( new AuthorizeAttribute { Roles = "Teacher" } );
         return app;
     }
 }

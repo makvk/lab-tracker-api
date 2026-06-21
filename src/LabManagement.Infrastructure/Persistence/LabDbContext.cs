@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using LabManagement.App.Common;
 using LabManagement.App.Domain.Entities;
+using LabManagement.App.Common.Exceptions;
 
 namespace LabManagement.Infrastructure.Persistence; 
 
@@ -12,6 +13,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     public DbSet<Student> Students { get; set; } 
     public DbSet<LabWork> LabWorks { get; set; }
 
+    // -- GET --
     public async Task<Submission?> GetSubmissionByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await Submissions
@@ -36,6 +38,15 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         return await Groups
             .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
     }
+    public async Task<Submission?> GetSubmissionByWorkAndStudentAsync(
+        Guid workId, 
+        Guid studentId, 
+        CancellationToken cancellationToken)
+    {
+        return await Submissions.FirstOrDefaultAsync(
+            s => s.LabWorkId == workId && s.StudentId == studentId, cancellationToken);
+    }
+    // -- POST --
     public async Task AddSubmissionAsync(Submission submission, CancellationToken cancellationToken)
     {
         await Submissions.AddAsync(submission, cancellationToken);
@@ -45,13 +56,17 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     {
         await LabWorks.AddAsync(labWork, cancellationToken);
     }
-    public async Task<Submission?> GetSubmissionByWorkAndStudentAsync(
-        Guid workId, 
-        Guid studentId, 
-        CancellationToken cancellationToken)
+    // -- DELETE --
+    public async Task DeleteLabWorkByIdAsync(Guid Id, CancellationToken cancellationToken)
     {
-        return await Submissions.FirstOrDefaultAsync(
-            s => s.LabWorkId == workId && s.StudentId == studentId, cancellationToken);
+        LabWork? labWork = await LabWorks.FirstOrDefaultAsync(l => l.Id == Id, cancellationToken) 
+            ?? throw new NotFoundException("Такой работы не существует");
+        
+        LabWorks.Remove(labWork);
+        if (Directory.Exists(labWork.FilePath)) 
+        {
+            Directory.Delete(labWork.FilePath, recursive: true);
+        }
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -20,5 +20,6 @@ public interface ILabDbContext
         Guid workId, 
         Guid studentId, 
         CancellationToken cancellationToken);
+    Task DeleteLabWorkByIdAsync(Guid Id, CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
