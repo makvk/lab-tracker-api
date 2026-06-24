@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using LabManagement.Api.DTOs;
 using LabManagement.Api.Services;
 using LabManagement.App.Common;
@@ -14,6 +15,8 @@ namespace LabManagement.Api.Endpoints;
 
 public static class WorkEndpoints
 {
+    public record UpdateDeadlineDto(DateTimeOffset Deadline);
+    public record DownloadLabWorkDto(string FilePath);
     public static IEndpointRouteBuilder MapWorkEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/works/{id:guid}", async (
@@ -36,6 +39,7 @@ public static class WorkEndpoints
         {
             List<Submission> submissions = await labDbContext.Submissions
                 .Include(s => s.Student)
+                .Include(s => s.LabWork)
                 .Where(s => s.LabWorkId == id).ToListAsync();
 
             if (submissions== null)
@@ -133,6 +137,18 @@ public static class WorkEndpoints
         .DisableAntiforgery()
         .Accepts<IFormFile>("multipart/form-data");
 
+        app.MapPut("/api/works/{id:guid}", async (
+            Guid id,
+            UpdateDeadlineDto updateDeadlineDto,
+            ILabDbContext labDbContext,
+            CancellationToken cancellationToken
+        ) =>
+        {
+            await labDbContext.ChangeLabWorkDeadline(id, updateDeadlineDto.Deadline.UtcDateTime, cancellationToken);
+            await labDbContext.SaveChangesAsync(cancellationToken);
+            return Results.NoContent();
+        }).RequireAuthorization( new AuthorizeAttribute{ Roles = "Teacher" });
+
         app.MapDelete("api/works/{id:guid}", async (
             Guid id,
             ILabDbContext labDbContext,
@@ -144,6 +160,69 @@ public static class WorkEndpoints
             return Results.NoContent();
         })
         .RequireAuthorization( new AuthorizeAttribute { Roles = "Teacher" } );
+
+        app.MapGet("/api/works/{id:guid}/download", async (
+            Guid id,
+            ILabDbContext labDbContext,
+            CancellationToken cancellationToken
+        ) =>
+        {
+            // 1. Находим лабораторную работу в базе, чтобы узнать путь к её папке
+            var labWork = await labDbContext.GetLabWorkByIdAsync(id, cancellationToken);
+            if (labWork == null)
+            {
+                return Results.NotFound("Лабораторная работа не найдена.");
+            }
+
+            // 2. Формируем абсолютный путь к директории на сервере
+            var absoluteFolderPath = Path.Combine(Directory.GetCurrentDirectory(), labWork.FilePath);
+
+            // Проверяем, существует ли папка физически
+            if (!Directory.Exists(absoluteFolderPath))
+            {
+                return Results.NotFound("Директория с файлами пуста или отсутствует на сервере.");
+            }
+
+            // Имя для будущего архива (например, "Лабораторная №1.zip")
+            string zipFileName = $"{labWork.Title}.zip";
+
+            // 3. Создаем поток в памяти для сборки ZIP-архива
+            var memoryStream = new MemoryStream();
+            
+            try
+            {
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
+                {
+                    var directoryInfo = new DirectoryInfo(absoluteFolderPath);
+                    
+                    // Перебираем все файлы в папке и добавляем в архив
+                    foreach (var file in directoryInfo.GetFiles())
+                    {
+                        var entry = archive.CreateEntry(file.Name, CompressionLevel.Fastest);
+                        using var entryStream = entry.Open();
+                        using var fileStream = file.OpenRead();
+                        await fileStream.CopyToAsync(entryStream, cancellationToken);
+                    }
+                }
+
+                // Сбрасываем позицию стрима на начало для чтения фронтендом
+                memoryStream.Position = 0;
+
+                // 4. Возвращаем архив в ответе
+                return Results.File(
+                    fileStream: memoryStream, 
+                    contentType: "application/zip", 
+                    fileDownloadName: zipFileName
+                );
+            }
+            catch (Exception)
+            {
+                await memoryStream.DisposeAsync();
+                throw;
+            }
+        })
+        .RequireAuthorization(new AuthorizeAttribute { Roles = "Teacher,Student" });
+
         return app;
     }
 }

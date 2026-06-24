@@ -1,3 +1,4 @@
+using LabManagement.Api.Services;
 using LabManagement.App.Common;
 using LabManagement.App.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -27,11 +28,23 @@ public static class GroupEndpoints
 
         app.MapGet("/api/groups/{id:guid}/works", async (
             Guid id,
-            ILabDbContext labDbContext) =>
+            ILabDbContext labDbContext,
+            ICurrentUserService currentUserService) =>
         {
-            var labWorks = await labDbContext.LabWorks.Where(lw => lw.GroupId == id).ToListAsync();
-
-            return Results.Ok(labWorks);
+            switch (currentUserService.Role) {
+                case "Teacher":
+                    var labWorks = await labDbContext.LabWorks.Where(
+                        lw => lw.GroupId == id && lw.TeacherId == currentUserService.UserId
+                        ).ToListAsync();
+                    return Results.Ok(labWorks);
+                case "Student":
+                    labWorks = await labDbContext.LabWorks.Where(
+                        lw => lw.GroupId == id
+                        ).ToListAsync();
+                    return Results.Ok(labWorks);
+                default:
+                    return Results.BadRequest();
+            }
         });
 
         return app;

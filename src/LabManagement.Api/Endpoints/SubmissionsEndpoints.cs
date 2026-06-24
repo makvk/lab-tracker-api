@@ -85,6 +85,31 @@ public static class SubmissionsEndpoints
             return Results.Ok(submission);
         });
 
+        app.MapGet("api/submissions/{id:guid}/download", async (
+            Guid id,
+            ILabDbContext labDbContext,
+            CancellationToken cancellationToken) =>
+        {
+            Submission? submission = await labDbContext.GetSubmissionByIdAsync(id, cancellationToken);
+            if (submission == null)
+            {
+                return Results.NotFound("Запись о работе не найдена.");
+            }
+
+            var absoluteFilePath = Path.Combine(Directory.GetCurrentDirectory(), submission.FilePath);
+
+            if (!File.Exists(absoluteFilePath))
+            {
+                return Results.NotFound("Файл физически отсутствует на сервере.");
+            }
+
+            // 4. Вытаскиваем оригинальное имя файла для скачивания
+            string downloadName = $"{submission.LabWork.Title}_{submission.Student.LastName}";
+
+            // 5. Отдаем файл с указанием его имени (браузер поймет, как его сохранить)
+            return Results.File(absoluteFilePath, "application/octet-stream", downloadName);
+        });
+
         return app;
     }
 }

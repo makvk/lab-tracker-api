@@ -7,7 +7,6 @@ public static class ServicesExtension
 {
     public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
     {
-
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();

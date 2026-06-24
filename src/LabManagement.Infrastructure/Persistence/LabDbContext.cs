@@ -22,6 +22,11 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
             .Include(sub => sub.Teacher)
             .FirstOrDefaultAsync(sub => sub.Id == id, cancellationToken);
     }
+    public async Task<LabWork?> GetLabWorkByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await LabWorks
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    } 
     public async Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await Teachers
@@ -67,6 +72,13 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         {
             Directory.Delete(labWork.FilePath, recursive: true);
         }
+    }
+    // -- PUT --
+    public async Task ChangeLabWorkDeadline(Guid Id, DateTimeOffset deadline, CancellationToken cancellationToken)
+    {
+        LabWork? labWork = await LabWorks.FirstOrDefaultAsync(l => l.Id == Id, cancellationToken) 
+            ?? throw new NotFoundException("Такой работы не существует");
+        labWork.Deadline = deadline;
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

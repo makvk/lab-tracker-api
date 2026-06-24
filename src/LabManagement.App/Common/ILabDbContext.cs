@@ -12,6 +12,7 @@ public interface ILabDbContext
     DbSet<Group> Groups { get; set; }
     Task AddSubmissionAsync(Submission submission, CancellationToken cancellationToken);
     Task AddLabWorkAsync(LabWork labWork, CancellationToken cancellationToken);
+    Task<LabWork?> GetLabWorkByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Submission?> GetSubmissionByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Teacher?> GetTeacherByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Student?> GetStudentByIdAsync(Guid id, CancellationToken cancellationToken);
@@ -21,5 +22,6 @@ public interface ILabDbContext
         Guid studentId, 
         CancellationToken cancellationToken);
     Task DeleteLabWorkByIdAsync(Guid Id, CancellationToken cancellationToken);
+    Task ChangeLabWorkDeadline(Guid Id, DateTimeOffset deadline, CancellationToken cancellationToken);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

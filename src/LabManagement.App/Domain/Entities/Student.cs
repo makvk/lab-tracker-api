@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LabManagement.App.Domain.Entities;
 
 public class Student
@@ -6,6 +8,7 @@ public class Student
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    [JsonIgnore]
     public string PasswordHash { get; set; } = string.Empty;
     
     // --- СВЯЗЬ С ГРУППОЙ ЧЕРЕЗ ГУИД ---
